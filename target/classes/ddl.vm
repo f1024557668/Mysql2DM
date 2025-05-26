@@ -1,0 +1,20 @@
+#foreach($table in $tables)
+    #set($prefix = "create table $table.table_name (")
+    $prefix
+    #foreach($column in $table.columns)
+        ${column.createColName} ${column.type} #if (!${column.nullable}) not null #end #if ($column.needDefault) default $column.default #end #if(!$foreach.last) , #end
+    #end,
+    CONSTRAINT pk_$table.table_name PRIMARY KEY ($table.pk_column)
+    #set($suffix = ");")
+    $suffix
+
+    #foreach($column in $table.columns)
+        #if($column.remark)
+        comment on column "$table.table_name"."$column.name" is '$column.remark';
+        #end
+    #end
+
+    #foreach($index in $table.indexes)
+        create #if(!$index.non_unique) unique #end index $index.index_name on $table.table_name ($index.index_column);
+    #end
+#end
